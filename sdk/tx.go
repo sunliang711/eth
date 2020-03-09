@@ -29,7 +29,7 @@ func dial(rpcURL string) (*ethclient.Client, error) {
 }
 
 // SendTx sends generic transaction to chain, including 'transfer eth' 'create contract'(when toAddr is empty string) 'call contract',not including 'call msg tx'
-// 2020/03/03 13:33:51
+// set gasPrice to 0 to use suggest gas price
 func SendTx(rpcURL string, fromSK string, toAddr string, value uint64, data []byte, gasPrice uint64, gasLimit uint64) (common.Hash, error) {
 	client, err := dial(rpcURL)
 	if err != nil {
@@ -78,6 +78,7 @@ func SendTx(rpcURL string, fromSK string, toAddr string, value uint64, data []by
 }
 
 // SendCallMsgTx calls readonly contract functions on local node
+// set gasPrice to 0 to use suggest gas price
 func SendCallMsgTx(rpcURL string, fromAddr string, toAddr string, data []byte, gasPrice uint64, gasLimit uint64) ([]byte, error) {
 	client, err := dial(rpcURL)
 	if err != nil {
@@ -164,6 +165,7 @@ func GetContractAddress(rpcURL string, hash string) (string, error) {
 }
 
 // WriteContract calls writable function of contract
+// set gasPrice to 0 to use suggest gas price
 func WriteContract(rpcURL string, sk string, contractAddress string, abi string, methodName, args string, gasPrice uint64, gasLimit uint64) (string, error) {
 	payload, err := Pack(abi, methodName, args)
 	if err != nil {
@@ -177,6 +179,7 @@ func WriteContract(rpcURL string, sk string, contractAddress string, abi string,
 }
 
 // ReadContract calls readonly function of contract
+// set gasPrice to 0 to use suggest gas price
 func ReadContract(rpcURL string, fromAddr string, contractAddress string, abi string, methodName, args string, gasPrice uint64, gasLimit uint64) ([]byte, error) {
 	payload, err := Pack(abi, methodName, args)
 	if err != nil {

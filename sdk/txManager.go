@@ -192,6 +192,26 @@ func (tm *TransactionManager) GetContractAddress(hash string) (string, error) {
 	return receipt.ContractAddress.String(), nil
 }
 
+func (tm *TransactionManager) GetContractAddressSync(hash string) (string, error) {
+	deadline := time.After(time.Second * time.Duration(tm.timeout))
+	tick := time.Tick(time.Second * time.Duration(tm.interval))
+
+	for {
+		select {
+		case <-deadline:
+			return "", fmt.Errorf("timeout")
+		case <-tick:
+			receipt, err := tm.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
+			if err != nil {
+				//skip
+			} else {
+				return receipt.ContractAddress.String(), nil
+			}
+		}
+	}
+
+}
+
 // WriteContract sends an async write contract,return hash,error
 func (tm *TransactionManager) WriteContract(sk string, contractAddress string, abi string, methodName, args string, gasLimit uint64) (string, error) {
 	payload, err := Pack(abi, methodName, args)
@@ -205,7 +225,7 @@ func (tm *TransactionManager) WriteContract(sk string, contractAddress string, a
 	return hash, nil
 }
 
-// WriteContract sends an sync write contract,return hash, gas used, error
+// WriteContractSync sends an sync write contract,return hash, gas used, error
 func (tm *TransactionManager) WriteContractSync(sk string, contractAddress string, abi string, methodName, args string, gasLimit uint64) (string, uint64, error) {
 	hash, err := tm.WriteContract(sk, contractAddress, abi, methodName, args, gasLimit)
 	if err != nil {
@@ -246,6 +266,31 @@ func (tm *TransactionManager) ReadContract(fromAddr string, contractAddress stri
 // return tx hash,error
 func (tm *TransactionManager) TransferEth(fromSK string, toAddr string, value uint64) (string, error) {
 	return tm.SendTx(fromSK, toAddr, value, nil, transferEthLimit)
+}
+
+// TransferEthSync send an sync eth-transfer tx
+// return tx hash,error
+func (tm *TransactionManager) TransferEthSync(fromSK string, toAddr string, value uint64) (string, error) {
+	hash, err := tm.TransferEth(fromSK, toAddr, value)
+	if err != nil {
+		return "", err
+	}
+
+	deadline := time.After(time.Second * time.Duration(tm.timeout))
+	tick := time.Tick(time.Second * time.Duration(tm.interval))
+	for {
+		select {
+		case <-deadline:
+			return "", fmt.Errorf("timeout")
+		case <-tick:
+			_, err := tm.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
+			if err != nil {
+				//skip
+			} else {
+				return hash, nil
+			}
+		}
+	}
 }
 
 // GetBalance query balance of 'address'
