@@ -14,7 +14,7 @@ import (
 
 // Pack encodes contract arguments to abi format
 /* Usage:
- * args format: uint256:123;bytes:0x12345678;string:"hello world";uint256[2]:1,2;uint256[]:1,2,3;address:0x1234...;
+* args format: uint256:123;bytes:0x12345678;string:"hello world";uint256[2]:1,2;uint256[]:1,2,3;address:0x1234;address[]:0x1234,0x5678...;
  * NOTE: for constructor : set methodName to empty string
 **/
 func Pack(abiStr string, methodName string, args string) ([]byte, error) {
@@ -97,6 +97,14 @@ func Pack(abiStr string, methodName string, args string) ([]byte, error) {
 				return nil, fmt.Errorf("address format error")
 			}
 			resultArgs = append(resultArgs, common.BytesToAddress(hexVal))
+		//TODO not tested
+		case "address[]":
+			hexArray, err := DecodeAddressStringArray(val)
+			if err != nil {
+				return nil, fmt.Errorf("address[] format error")
+			}
+			resultArgs = append(resultArgs, hexArray)
+
 		default:
 			//TODO
 			//uint256[2]...
@@ -174,6 +182,22 @@ func DecodeHexString(input string) ([]byte, error) {
 	}
 
 	return hexVal, nil
+}
+
+func DecodeAddressStringArray(val string) ([]common.Address, error) {
+	var ret []common.Address
+	if strings.HasSuffix(val, ",") {
+		val = val[:len(val)-1]
+	}
+	allHexStrings := strings.Split(val, ",")
+	for _, s := range allHexStrings {
+		v, err := DecodeHexString(s)
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, common.BytesToAddress(v))
+	}
+	return ret, nil
 }
 
 func DecodeBytes32String(val string) ([32]byte, error) {
