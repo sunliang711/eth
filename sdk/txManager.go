@@ -21,7 +21,7 @@ const (
 // TransactionManager store info to operate tx
 type TransactionManager struct {
 	rpcURL   string
-	gasPrice uint64
+	gasPrice uint64 // default gas price
 	timeout  uint64
 	interval uint64
 	*ethclient.Client
@@ -72,7 +72,9 @@ func (tm *TransactionManager) GasPrice() uint64 {
 }
 
 // SendTx sends an async tx, and return tx's hash
-func (tm *TransactionManager) SendTx(fromSK string, toAddr string, value uint64, data []byte, gasLimit uint64) (string, error) {
+// set gasPrice to 0 to use tm.gasPrice
+// set nonce to 0 to use pendingNonce
+func (tm *TransactionManager) SendTx(fromSK string, toAddr string, value uint64, data []byte, gasPrice uint64, nonce uint64, gasLimit uint64) (string, error) {
 	privK, _, fromAddress, err := HexToAccount(fromSK)
 	if err != nil {
 		return "", fmt.Errorf("convert hex sk to ECDSA error: %s", err.Error())
@@ -81,14 +83,18 @@ func (tm *TransactionManager) SendTx(fromSK string, toAddr string, value uint64,
 	if toAddr != "" {
 		toAddress = common.HexToAddress(toAddr)
 	}
-	//nonce
-	nonce, err := tm.Client.PendingNonceAt(context.Background(), fromAddress)
-	if err != nil {
-		return "", fmt.Errorf("PendingNonceAt() error: %s", err.Error())
+	if nonce == 0 {
+		nonce, err = tm.Client.PendingNonceAt(context.Background(), fromAddress)
+		if err != nil {
+			return "", fmt.Errorf("PendingNonceAt() error: %s", err.Error())
+		}
 	}
 
 	price := new(big.Int)
-	price.SetUint64(tm.gasPrice)
+	if gasPrice == 0 {
+		gasPrice = tm.gasPrice
+	}
+	price.SetUint64(gasPrice)
 
 	// value
 	val := new(big.Int)
@@ -109,8 +115,8 @@ func (tm *TransactionManager) SendTx(fromSK string, toAddr string, value uint64,
 // 如果gasUsed 等于 gasLimit
 //    1. 如果这是个智能合约相关的操作(创建合约、写合约)，那么这个交易可能是部分完成，执行了部分指令, 用掉了gasLimit等量的gas，应该提高gasLimit上限重新调用一次
 //    2. 如果这是个转账操作，那么执行时成功的（转账的gasLimit为固定值21000） TODO 转账时gasLimit小于21000会发生啥
-func (tm *TransactionManager) SendTxSync(fromSK string, toAddr string, value uint64, data []byte, gasLimit uint64) (string, uint64, error) {
-	hash, err := tm.SendTx(fromSK, toAddr, value, data, gasLimit)
+func (tm *TransactionManager) SendTxSync(fromSK string, toAddr string, value uint64, data []byte, gasPrice uint64, nonce uint64, gasLimit uint64) (string, uint64, error) {
+	hash, err := tm.SendTx(fromSK, toAddr, value, data, gasPrice, nonce, gasLimit)
 	if err != nil {
 		return "", 0, err
 	}
@@ -132,7 +138,7 @@ func (tm *TransactionManager) SendTxSync(fromSK string, toAddr string, value uin
 	}
 }
 
-func (tm *TransactionManager) SendCallMsgTx(fromAddr string, toAddr string, data []byte, gasLimit uint64) ([]byte, error) {
+func (tm *TransactionManager) SendCallMsgTx(fromAddr string, toAddr string, data []byte, gasPrice uint64, gasLimit uint64) ([]byte, error) {
 	from := common.HexToAddress(fromAddr)
 	to := common.HexToAddress(toAddr)
 
@@ -140,7 +146,10 @@ func (tm *TransactionManager) SendCallMsgTx(fromAddr string, toAddr string, data
 	v.SetUint64(uint64(0))
 
 	price := new(big.Int)
-	price.SetUint64(tm.gasPrice)
+	if gasPrice == 0 {
+		gasPrice = tm.gasPrice
+	}
+	price.SetUint64(gasPrice)
 
 	msg := ethereum.CallMsg{
 		From:     from,
@@ -154,14 +163,14 @@ func (tm *TransactionManager) SendCallMsgTx(fromAddr string, toAddr string, data
 }
 
 // CreateContract creates a contract,return tx's hash,use it to query contract address
-func (tm *TransactionManager) CreateContract(sk string, data []byte, gasLimit uint64) (string, error) {
-	return tm.SendTx(sk, "", 0, data, gasLimit)
+func (tm *TransactionManager) CreateContract(sk string, data []byte, gasPrice uint64, nonce uint64, gasLimit uint64) (string, error) {
+	return tm.SendTx(sk, "", 0, data, gasPrice, nonce, gasLimit)
 }
 
 // CreateContractSync creates a contract syncly, return contract address ,tx hash ,gas used, error
 // set timeout to 0 to use default timeout value
-func (tm *TransactionManager) CreateContractSync(sk string, data []byte, gasLimit uint64) (string, string, uint64, error) {
-	hash, err := tm.CreateContract(sk, data, gasLimit)
+func (tm *TransactionManager) CreateContractSync(sk string, data []byte, gasPrice uint64, nonce uint64, gasLimit uint64) (string, string, uint64, error) {
+	hash, err := tm.CreateContract(sk, data, gasPrice, nonce, gasLimit)
 	if err != nil {
 		return "", "", 0, err
 	}
@@ -213,12 +222,12 @@ func (tm *TransactionManager) GetContractAddressSync(hash string) (string, error
 }
 
 // WriteContract sends an async write contract,return hash,error
-func (tm *TransactionManager) WriteContract(sk string, contractAddress string, abi string, methodName, args string, gasLimit uint64) (string, error) {
+func (tm *TransactionManager) WriteContract(sk string, contractAddress string, abi string, methodName, args string, gasPrice uint64, nonce uint64, gasLimit uint64) (string, error) {
 	payload, err := Pack(abi, methodName, args)
 	if err != nil {
 		return "", err
 	}
-	hash, err := tm.SendTx(sk, contractAddress, 0, payload, gasLimit)
+	hash, err := tm.SendTx(sk, contractAddress, 0, payload, gasPrice, nonce, gasLimit)
 	if err != nil {
 		return "", err
 	}
@@ -226,8 +235,8 @@ func (tm *TransactionManager) WriteContract(sk string, contractAddress string, a
 }
 
 // WriteContractSync sends an sync write contract,return hash, gas used, error
-func (tm *TransactionManager) WriteContractSync(sk string, contractAddress string, abi string, methodName, args string, gasLimit uint64) (string, uint64, error) {
-	hash, err := tm.WriteContract(sk, contractAddress, abi, methodName, args, gasLimit)
+func (tm *TransactionManager) WriteContractSync(sk string, contractAddress string, abi string, methodName, args string, gasPrice uint64, nonce uint64, gasLimit uint64) (string, uint64, error) {
+	hash, err := tm.WriteContract(sk, contractAddress, abi, methodName, args, gasPrice, nonce, gasLimit)
 	if err != nil {
 		return "", 0, err
 	}
@@ -250,12 +259,12 @@ func (tm *TransactionManager) WriteContractSync(sk string, contractAddress strin
 	}
 }
 
-func (tm *TransactionManager) ReadContract(fromAddr string, contractAddress string, abi string, methodName, args string, gasLimit uint64) ([]byte, error) {
+func (tm *TransactionManager) ReadContract(fromAddr string, contractAddress string, abi string, methodName, args string, gasPrice uint64, gasLimit uint64) ([]byte, error) {
 	payload, err := Pack(abi, methodName, args)
 	if err != nil {
 		return nil, err
 	}
-	output, err := tm.SendCallMsgTx(fromAddr, contractAddress, payload, gasLimit)
+	output, err := tm.SendCallMsgTx(fromAddr, contractAddress, payload, gasPrice, gasLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -264,14 +273,14 @@ func (tm *TransactionManager) ReadContract(fromAddr string, contractAddress stri
 
 // TransferEth send an async eth-transfer tx
 // return tx hash,error
-func (tm *TransactionManager) TransferEth(fromSK string, toAddr string, value uint64) (string, error) {
-	return tm.SendTx(fromSK, toAddr, value, nil, transferEthLimit)
+func (tm *TransactionManager) TransferEth(fromSK string, toAddr string, value uint64, gasPrice uint64, nonce uint64) (string, error) {
+	return tm.SendTx(fromSK, toAddr, value, nil, gasPrice, nonce, transferEthLimit)
 }
 
 // TransferEthSync send an sync eth-transfer tx
 // return tx hash,error
-func (tm *TransactionManager) TransferEthSync(fromSK string, toAddr string, value uint64) (string, error) {
-	hash, err := tm.TransferEth(fromSK, toAddr, value)
+func (tm *TransactionManager) TransferEthSync(fromSK string, toAddr string, value uint64, gasPrice uint64, nonce uint64) (string, error) {
+	hash, err := tm.TransferEth(fromSK, toAddr, value, gasPrice, nonce)
 	if err != nil {
 		return "", err
 	}

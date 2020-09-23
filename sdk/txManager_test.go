@@ -72,7 +72,7 @@ func TestCreateContract(t *testing.T) {
 		t.Fatalf("decode bytecode error: %v", err)
 	}
 
-	address, hash, gasUsed, err := txMan.CreateContractSync(sk1, bytecode, createContractLimit)
+	address, hash, gasUsed, err := txMan.CreateContractSync(sk1, bytecode, 0, 0, createContractLimit)
 	if err != nil {
 		t.Fatalf("create contract error: %s", err)
 	}
@@ -93,7 +93,7 @@ func TestWriteContract(t *testing.T) {
 	abiStr := string(abiContent)
 	args := fmt.Sprintf("address:%v;uint256:1;", addr2)
 	t.Logf("args: %v", args)
-	hash, gasUsed, err := txMan.WriteContractSync(sk1, contractAddress, abiStr, "transfer", args, writeContractLimit)
+	hash, gasUsed, err := txMan.WriteContractSync(sk1, contractAddress, abiStr, "transfer", args, 0, 0, writeContractLimit)
 	if err != nil {
 		t.Fatalf("write contract error: %s", err.Error())
 	}
@@ -114,7 +114,7 @@ func TestReadContract(t *testing.T) {
 	abiStr := string(abiContent)
 	args := fmt.Sprintf("address:%v;", addr2)
 	t.Logf("args: %v", args)
-	output, err := txMan.ReadContract(addr1, contractAddress, abiStr, "balanceOf", args, readContractLimit)
+	output, err := txMan.ReadContract(addr1, contractAddress, abiStr, "balanceOf", args, 0, readContractLimit)
 	if err != nil {
 		t.Fatalf("read contract error: %s", err.Error())
 	}
