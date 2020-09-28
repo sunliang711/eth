@@ -1,7 +1,9 @@
 package sdk
 
 import (
+	"bytes"
 	"crypto/ecdsa"
+	"encoding/json"
 	"io/ioutil"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
@@ -39,6 +41,26 @@ func ExportAccount(utcFile string, auth string) ([]byte, error) {
 		return nil, err
 	}
 	return ret, nil
+}
+
+type Account struct {
+	Address    string `json:"address"`
+	PrivateKey string `json:"privatekey"`
+	ID         string `json:"id"`
+}
+
+func ExportAccountObject(utcFile, auth string) (*Account, error) {
+	bs, err := ExportAccount(utcFile, auth)
+	if err != nil {
+		return nil, err
+	}
+	var account Account
+	err = json.NewDecoder(bytes.NewReader(bs)).Decode(&account)
+	if err != nil {
+		return nil, err
+	}
+
+	return &account, nil
 }
 
 // HexToAccount convert hex string of private key to ECDSA account
