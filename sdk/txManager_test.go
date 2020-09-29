@@ -33,7 +33,7 @@ func TestCreateAccount(t *testing.T) {
 	t.Logf("\nsk: %s\naddr: %s\npk: %s\n", hex.EncodeToString(sk), hex.EncodeToString(addr), hex.EncodeToString(pk))
 }
 func TestGetBalance2(t *testing.T) {
-	txMan, err := New(rpcURL2, 0, 0, 0)
+	txMan, err := New(rpcURL2, 0, createContractLimit, 0, 0)
 	if err != nil {
 		t.Fatalf("New txManager error: %s", err)
 	}
@@ -51,7 +51,7 @@ type ByteCode struct {
 }
 
 func TestCreateContract(t *testing.T) {
-	txMan, err := New(rpcURL2, 0, 0, 0)
+	txMan, err := New(rpcURL2, 0, createContractLimit, 0, 0)
 	if err != nil {
 		t.Fatalf("New txManager error: %s", err)
 	}
@@ -72,7 +72,7 @@ func TestCreateContract(t *testing.T) {
 		t.Fatalf("decode bytecode error: %v", err)
 	}
 
-	address, hash, gasUsed, err := txMan.CreateContractSync(sk1, bytecode, 0, 0, createContractLimit)
+	address, hash, gasUsed, err := txMan.CreateContractSync(sk1, bytecode, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("create contract error: %s", err)
 	}
@@ -80,7 +80,7 @@ func TestCreateContract(t *testing.T) {
 
 }
 func TestWriteContract(t *testing.T) {
-	txMan, err := New(rpcURL2, 0, 0, 0)
+	txMan, err := New(rpcURL2, 0, writeContractLimit, 0, 0)
 	if err != nil {
 		t.Fatalf("New txManager error: %s", err)
 	}
@@ -93,7 +93,7 @@ func TestWriteContract(t *testing.T) {
 	abiStr := string(abiContent)
 	args := fmt.Sprintf("address:%v;uint256:1;", addr2)
 	t.Logf("args: %v", args)
-	hash, gasUsed, err := txMan.WriteContractSync(sk1, contractAddress, abiStr, "transfer", args, 0, 0, writeContractLimit)
+	hash, gasUsed, err := txMan.WriteContractSync(sk1, contractAddress, abiStr, "transfer", args, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("write contract error: %s", err.Error())
 	}
@@ -101,7 +101,7 @@ func TestWriteContract(t *testing.T) {
 }
 
 func TestReadContract(t *testing.T) {
-	txMan, err := New(rpcURL2, 0, 0, 0)
+	txMan, err := New(rpcURL2, 0, readContractLimit, 0, 0)
 	if err != nil {
 		t.Fatalf("New txManager error: %s", err)
 	}
@@ -114,7 +114,7 @@ func TestReadContract(t *testing.T) {
 	abiStr := string(abiContent)
 	args := fmt.Sprintf("address:%v;", addr2)
 	t.Logf("args: %v", args)
-	output, err := txMan.ReadContract(addr1, contractAddress, abiStr, "balanceOf", args, 0, readContractLimit)
+	output, err := txMan.ReadContract(addr1, contractAddress, abiStr, "balanceOf", args, 0, 0)
 	if err != nil {
 		t.Fatalf("read contract error: %s", err.Error())
 	}

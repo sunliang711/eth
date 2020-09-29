@@ -22,6 +22,7 @@ const (
 type TransactionManager struct {
 	rpcURL   string
 	gasPrice uint64 // default gas price
+	gasLimit uint64 // default gas limit
 	timeout  uint64
 	interval uint64
 	*ethclient.Client
@@ -33,11 +34,12 @@ type TransactionManager struct {
 ** if timeout is 0, use default timeout
 ** if interval is 0, use default interval
  */
-func New(rpcURL string, gasPrice, timeout, interval uint64) (*TransactionManager, error) {
+func New(rpcURL string, gasPrice, gasLimit, timeout, interval uint64) (*TransactionManager, error) {
 	var err error
 	tm := &TransactionManager{
 		rpcURL:   rpcURL,
 		gasPrice: gasPrice,
+		gasLimit: gasLimit,
 		timeout:  timeout,
 		interval: interval,
 	}
@@ -95,6 +97,10 @@ func (tm *TransactionManager) SendTx(fromSK string, toAddr string, value uint64,
 		gasPrice = tm.gasPrice
 	}
 	price.SetUint64(gasPrice)
+
+	if gasLimit == 0 {
+		gasLimit = tm.gasLimit
+	}
 
 	// value
 	val := new(big.Int)

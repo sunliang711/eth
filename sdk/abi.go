@@ -18,11 +18,9 @@ import (
  * NOTE: for constructor : set methodName to empty string
 **/
 func Pack(abiStr string, methodName string, args string) ([]byte, error) {
-	logrus.Debugf("method name: %s", methodName)
 	abiObj, err := abi.JSON(strings.NewReader(abiStr))
 	if err != nil {
-		logrus.Errorf("abi.JSON error: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("abi.JSON error: %v", err)
 	}
 
 	resultArgs := []interface{}{}
@@ -116,7 +114,6 @@ func Pack(abiStr string, methodName string, args string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("abi.JSON() error: %v", err)
 	}
-	logrus.Infof("pack result: %#x", result)
 	return result, nil
 
 }
