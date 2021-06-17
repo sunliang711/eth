@@ -11,14 +11,14 @@ import (
 
 const (
 	rpcURL2 = "http://localhost:8545"
-	//contract owner
+	// contract owner
 	sk1 = "6d6078a1f348b1c7f93b2b5dd1ac93a4d40e73c02b5f724b32dc5911daef34f8"
 	addr1 = "f5426ae9197698ed77c04c4eca00b2ea3e1df00c"
 
 	sk2   = "7766d545d9c1a22aabc3524990936ab1aa8e3269920b59f87eeb4d331e3b8b65"
 	addr2 = "cd449a0cdb1c9b95a2bc2b531c565333e0c0bb0a"
 
-	//CHANGE ME
+	// CHANGE ME
 	contractAddress = "0x102ac5F9A5362b572DbBa8d2C7C1175D125c3A43"
 
 	createContractLimit = 2e6

@@ -74,8 +74,9 @@ func (tm *TransactionManager) GasPrice() uint64 {
 }
 
 // SendTx sends an async tx, and return tx's hash
-// set gasPrice to 0 to use tm.gasPrice
-// set nonce to 0 to use pendingNonce
+// pass gasPrice to 0 to use tm.gasPrice
+// pass nonce to 0 to use pendingNonce
+// pass gasLimit to 0 to use tm.gasLimit
 func (tm *TransactionManager) SendTx(fromSK string, toAddr string, value *big.Int, data []byte, gasPrice uint64, nonce uint64, gasLimit uint64) (string, error) {
 	privK, _, fromAddress, err := HexToAccount(fromSK)
 	if err != nil {
