@@ -12,7 +12,7 @@ import (
 const (
 	rpcURL2 = "http://localhost:8545"
 	// contract owner
-	sk1 = "6d6078a1f348b1c7f93b2b5dd1ac93a4d40e73c02b5f724b32dc5911daef34f8"
+	sk1   = "6d6078a1f348b1c7f93b2b5dd1ac93a4d40e73c02b5f724b32dc5911daef34f8"
 	addr1 = "f5426ae9197698ed77c04c4eca00b2ea3e1df00c"
 
 	sk2   = "7766d545d9c1a22aabc3524990936ab1aa8e3269920b59f87eeb4d331e3b8b65"
@@ -51,29 +51,28 @@ type ByteCode struct {
 	SourceMap string `json:"sourceMap"`
 }
 
-func TestTransferEth(t *testing.T){
-	txMan,err := New(rpcURL2,0,21000,0,0)
-	if err != nil{
-		t.Fatalf("new txman error: %v",err)
+func TestTransferEth(t *testing.T) {
+	txMan, err := New(rpcURL2, 0, 21000, 0, 0)
+	if err != nil {
+		t.Fatalf("new txman error: %v", err)
 	}
-	fromSk :=sk1
+	fromSk := sk1
 	toAddr := addr2
 	v1 := "12"
 
 	value := big.NewInt(0)
-	_,ok := value.SetString(v1,10)
-	if !ok{
-		t.Fatalf("set v1 error: %v",err)
+	_, ok := value.SetString(v1, 10)
+	if !ok {
+		t.Fatalf("set v1 error: %v", err)
 	}
-	
-	
+
 	gasPrice := uint64(10)
 
-	txHash,err := txMan.TransferEth(fromSk,toAddr,value,gasPrice,0)
-	if err != nil{
-		t.Fatalf("transfer eth error: %v",err)
+	txHash, err := txMan.TransferEth(fromSk, toAddr, value, gasPrice, 0)
+	if err != nil {
+		t.Fatalf("transfer eth error: %v", err)
 	}
-	t.Logf("tx hash: %v",txHash)
+	t.Logf("tx hash: %v", txHash)
 }
 
 func TestCreateContract(t *testing.T) {
@@ -119,7 +118,7 @@ func TestWriteContract(t *testing.T) {
 	abiStr := string(abiContent)
 	args := fmt.Sprintf("address:%v;uint256:1;", addr2)
 	t.Logf("args: %v", args)
-	hash, gasUsed, err := txMan.WriteContractSync(sk1, contractAddress, abiStr, "transfer", args, 0, 0, 0)
+	hash, gasUsed, err := txMan.WriteContractSync(sk1, contractAddress, nil, abiStr, "transfer", args, 0, 0, 0)
 	if err != nil {
 		t.Fatalf("write contract error: %s", err.Error())
 	}

@@ -103,7 +103,6 @@ func (tm *TransactionManager) SendTx(fromSK string, toAddr string, value *big.In
 		gasLimit = tm.gasLimit
 	}
 
-
 	var tx *types.Transaction
 	if toAddr != "" {
 		tx = types.NewTransaction(nonce, toAddress, value, gasLimit, price, data)
@@ -134,7 +133,7 @@ func (tm *TransactionManager) SendTxSync(fromSK string, toAddr string, value *bi
 		case <-tick:
 			receipt, err := tm.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
 			if err != nil {
-				//ignore
+				// ignore
 			} else {
 				return hash, receipt.GasUsed, nil
 			}
@@ -188,7 +187,7 @@ func (tm *TransactionManager) CreateContractSync(sk string, data []byte, gasPric
 		case <-tick:
 			receipt, err := tm.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
 			if err != nil {
-				//skip
+				// skip
 			} else {
 				return receipt.ContractAddress.String(), hash, receipt.GasUsed, nil
 			}
@@ -216,7 +215,7 @@ func (tm *TransactionManager) GetContractAddressSync(hash string) (string, error
 		case <-tick:
 			receipt, err := tm.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
 			if err != nil {
-				//skip
+				// skip
 			} else {
 				return receipt.ContractAddress.String(), nil
 			}
@@ -226,12 +225,12 @@ func (tm *TransactionManager) GetContractAddressSync(hash string) (string, error
 }
 
 // WriteContract sends an async write contract,return hash,error
-func (tm *TransactionManager) WriteContract(sk string, contractAddress string, abi string, methodName, args string, gasPrice uint64, nonce uint64, gasLimit uint64) (string, error) {
+func (tm *TransactionManager) WriteContract(sk string, contractAddress string, v *big.Int, abi string, methodName, args string, gasPrice uint64, nonce uint64, gasLimit uint64) (string, error) {
 	payload, err := Pack(abi, methodName, args)
 	if err != nil {
 		return "", err
 	}
-	hash, err := tm.SendTx(sk, contractAddress, nil, payload, gasPrice, nonce, gasLimit)
+	hash, err := tm.SendTx(sk, contractAddress, v, payload, gasPrice, nonce, gasLimit)
 	if err != nil {
 		return "", err
 	}
@@ -239,8 +238,8 @@ func (tm *TransactionManager) WriteContract(sk string, contractAddress string, a
 }
 
 // WriteContractSync sends an sync write contract,return hash, gas used, error
-func (tm *TransactionManager) WriteContractSync(sk string, contractAddress string, abi string, methodName, args string, gasPrice uint64, nonce uint64, gasLimit uint64) (string, uint64, error) {
-	hash, err := tm.WriteContract(sk, contractAddress, abi, methodName, args, gasPrice, nonce, gasLimit)
+func (tm *TransactionManager) WriteContractSync(sk string, contractAddress string, v *big.Int, abi string, methodName, args string, gasPrice uint64, nonce uint64, gasLimit uint64) (string, uint64, error) {
+	hash, err := tm.WriteContract(sk, contractAddress, v, abi, methodName, args, gasPrice, nonce, gasLimit)
 	if err != nil {
 		return "", 0, err
 	}
@@ -255,7 +254,7 @@ func (tm *TransactionManager) WriteContractSync(sk string, contractAddress strin
 		case <-tick:
 			receipt, err := tm.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
 			if err != nil {
-				//skip
+				// skip
 			} else {
 				return hash, receipt.GasUsed, nil
 			}
@@ -298,7 +297,7 @@ func (tm *TransactionManager) TransferEthSync(fromSK string, toAddr string, valu
 		case <-tick:
 			_, err := tm.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
 			if err != nil {
-				//skip
+				// skip
 			} else {
 				return hash, nil
 			}

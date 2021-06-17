@@ -21,7 +21,7 @@ func (tm *TransactionManager) BalanceOf(contractAddress string, fromAddr string,
 
 func (tm *TransactionManager) Transfer(contractAddress string, sk string, to string, value string, price uint64, nonce uint64, limit uint64) (string, error) {
 	args := fmt.Sprintf("address:%v;uint256:%v", to, value)
-	return tm.WriteContract(sk, contractAddress, ERC20_ABI, "transfer", args, price, nonce, limit)
+	return tm.WriteContract(sk, contractAddress,nil, ERC20_ABI, "transfer", args, price, nonce, limit)
 }
 
 func (tm *TransactionManager) Approve() {
