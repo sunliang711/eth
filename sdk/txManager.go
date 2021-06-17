@@ -26,6 +26,7 @@ type TransactionManager struct {
 	timeout  uint64
 	interval uint64
 	*ethclient.Client
+	chainID string
 }
 
 // New makes a new TransactionManager
@@ -63,6 +64,11 @@ func New(rpcURL string, gasPrice, gasLimit, timeout, interval uint64) (*Transact
 	}
 
 	return tm, nil
+}
+
+// set chain id for EIP155
+func (tm *TransactionManager) SetChainID(id string) {
+	tm.chainID = id
 }
 
 func (tm *TransactionManager) Close() {
@@ -109,7 +115,16 @@ func (tm *TransactionManager) SendTx(fromSK string, toAddr string, value *big.In
 	} else {
 		tx = types.NewContractCreation(nonce, value, gasLimit, price, data)
 	}
-	signedTx, err := types.SignTx(tx, types.HomesteadSigner{}, privK)
+	var signedTx *types.Transaction
+	if tm.chainID != "" {
+		chainId, success := big.NewInt(0).SetString(tm.chainID, 10)
+		if !success {
+			return "", fmt.Errorf("invalid chain id")
+		}
+		signedTx, err = types.SignTx(tx, types.NewEIP155Signer(chainId), privK)
+	} else {
+		signedTx, err = types.SignTx(tx, types.HomesteadSigner{}, privK)
+	}
 	return signedTx.Hash().String(), tm.Client.SendTransaction(context.Background(), signedTx)
 }
 

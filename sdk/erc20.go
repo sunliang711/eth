@@ -21,17 +21,23 @@ func (tm *TransactionManager) BalanceOf(contractAddress string, fromAddr string,
 
 func (tm *TransactionManager) Transfer(contractAddress string, sk string, to string, value string, price uint64, nonce uint64, limit uint64) (string, error) {
 	args := fmt.Sprintf("address:%v;uint256:%v", to, value)
-	return tm.WriteContract(sk, contractAddress,nil, ERC20_ABI, "transfer", args, price, nonce, limit)
+	return tm.WriteContract(sk, contractAddress, nil, ERC20_ABI, "transfer", args, price, nonce, limit)
 }
 
-func (tm *TransactionManager) Approve() {
-	panic("not implement")
+func (tm *TransactionManager) Approve(contractAddress string, sk string, spender string, value string, price uint64, nonce uint64, limit uint64) (string, error) {
+	args := fmt.Sprintf("address:%v;uint256:%v", spender, value)
+	return tm.WriteContract(sk, contractAddress, nil, ERC20_ABI, "approve", args, price, nonce, limit)
 }
 
-func (tm *TransactionManager) TransferFrom() {
-	panic("not implement")
+func (tm *TransactionManager) TransferFrom(contractAddress string, sk string, from string, to string, value string, price uint64, nonce uint64, limit uint64) (string, error) {
+	args := fmt.Sprintf("address:%v;address:%v;uint256:%v", from, to, value)
+	return tm.WriteContract(sk, contractAddress, nil, ERC20_ABI, "transferFrom", args, price, nonce, limit)
 }
 
 func (tm *TransactionManager) TotalSupply(contractAddress string, fromAddr string) ([]byte, error) {
 	return tm.ReadContract(fromAddr, contractAddress, ERC20_ABI, "totalSupply", "", 0, 0)
+}
+
+func (tm *TransactionManager) Symbol(contractAddress string, fromAddr string) ([]byte, error) {
+	return tm.ReadContract(fromAddr, contractAddress, ERC20_ABI, "symbol", "", 0, 0)
 }
