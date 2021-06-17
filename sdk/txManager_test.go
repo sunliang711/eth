@@ -42,7 +42,7 @@ func TestGetBalance2(t *testing.T) {
 	if err != nil {
 		t.Fatalf("get balance error: %s", err.Error())
 	}
-	t.Logf("balance: %d", balance)
+	t.Logf("balance: %v", balance.String())
 }
 
 type ByteCode struct {

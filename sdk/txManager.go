@@ -321,10 +321,6 @@ func (tm *TransactionManager) TransferEthSync(fromSK string, toAddr string, valu
 }
 
 // GetBalance query balance of 'address'
-func (tm *TransactionManager) GetBalance(address string) (uint64, error) {
-	balance, err := tm.Client.BalanceAt(context.Background(), common.HexToAddress(address), nil)
-	if err != nil {
-		return 0, err
-	}
-	return balance.Uint64(), nil
+func (tm *TransactionManager) GetBalance(address string) (*big.Int, error) {
+	return tm.Client.BalanceAt(context.Background(), common.HexToAddress(address), nil)
 }
