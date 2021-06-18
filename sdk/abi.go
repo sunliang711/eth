@@ -9,7 +9,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/sirupsen/logrus"
 )
 
 // Pack encodes contract arguments to abi format
@@ -31,14 +30,11 @@ func Pack(abiStr string, methodName string, args string) ([]byte, error) {
 		}
 		allArgs = strings.Split(args, ";")
 	}
-	logrus.Debugf("allArgs: '%v'", allArgs)
-	logrus.Debugf("len(allArgs): %v", len(allArgs))
 	for _, arg := range allArgs {
 		if len(arg) == 0 {
 			continue
 		}
-		//arg format: type:value
-		logrus.Debugf("arg: %s", arg)
+		// arg format: type:value
 		splitedArg := strings.Split(arg, ":")
 		if len(splitedArg) != 2 {
 			return nil, fmt.Errorf("args format error")
@@ -52,30 +48,33 @@ func Pack(abiStr string, methodName string, args string) ([]byte, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			resultArgs = append(resultArgs, v)
+
 		case "bytes":
 			hexVal, err := DecodeHexString(val)
 			if err != nil {
 				return nil, fmt.Errorf("bytes value format error")
 			}
 			resultArgs = append(resultArgs, []byte(hexVal))
+
 		case "bytes32":
 			v, err := DecodeBytes32String(val)
 			if err != nil {
 				return nil, err
 			}
 			resultArgs = append(resultArgs, v)
+
 		case "string":
 			val = strings.Trim(val, `"`)
-			logrus.Debugf("string value: %v", val)
 			resultArgs = append(resultArgs, val)
+
 		case "uint256[]":
 			v, err := DecodeUint256ArrayString(val)
 			if err != nil {
 				return nil, err
 			}
 			resultArgs = append(resultArgs, v)
+
 		case "bytes32[]":
 			arr, err := DecodeBytes32ArrayString(val)
 			if err != nil {
@@ -89,13 +88,14 @@ func Pack(abiStr string, methodName string, args string) ([]byte, error) {
 				return nil, err
 			}
 			resultArgs = append(resultArgs, arr)
+
 		case "address":
 			hexVal, err := DecodeHexString(val)
 			if err != nil {
 				return nil, fmt.Errorf("address format error")
 			}
 			resultArgs = append(resultArgs, common.BytesToAddress(hexVal))
-		//TODO not tested
+
 		case "address[]":
 			hexArray, err := DecodeAddressStringArray(val)
 			if err != nil {
@@ -104,12 +104,11 @@ func Pack(abiStr string, methodName string, args string) ([]byte, error) {
 			resultArgs = append(resultArgs, hexArray)
 
 		default:
-			//TODO
-			//uint256[2]...
+			// TODO
+			// uint256[2]...
 			return nil, fmt.Errorf("Not support type: %v", typ)
 		}
 	}
-	logrus.Debugf("resultArgs: %x", resultArgs)
 	result, err := abiObj.Pack(methodName, resultArgs...)
 	if err != nil {
 		return nil, fmt.Errorf("abi.JSON() error: %v", err)
@@ -122,7 +121,7 @@ func Pack(abiStr string, methodName string, args string) ([]byte, error) {
 func Unpack(abiStr string, methodName string, returnData string) error {
 	abiObj, err := abi.JSON(strings.NewReader(abiStr))
 	if err != nil {
-		logrus.Fatalf("abi.JSON error: %v", err)
+		return err
 	}
 
 	var result []interface{}
@@ -156,7 +155,7 @@ func Unpack(abiStr string, methodName string, returnData string) error {
 	for i, r := range result {
 		fmt.Printf("type: %s, value: %+v\n", resultType[i], r)
 	}
-	//TODO return value
+	// TODO return value
 
 	return nil
 }

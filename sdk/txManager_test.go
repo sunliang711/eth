@@ -139,7 +139,7 @@ func TestReadContract(t *testing.T) {
 	abiStr := string(abiContent)
 	args := fmt.Sprintf("address:%v;", addr2)
 	t.Logf("args: %v", args)
-	output, err := txMan.ReadContract(addr1, contractAddress, abiStr, "balanceOf", args, 0, 0)
+	output, err := txMan.ReadContract(contractAddress, abiStr, "balanceOf", args, nil)
 	if err != nil {
 		t.Fatalf("read contract error: %s", err.Error())
 	}

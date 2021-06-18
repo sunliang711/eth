@@ -156,28 +156,14 @@ func (tm *TransactionManager) SendTxSync(fromSK string, toAddr string, value *bi
 	}
 }
 
-func (tm *TransactionManager) SendCallMsgTx(fromAddr string, toAddr string, data []byte, gasPrice uint64, gasLimit uint64) ([]byte, error) {
-	from := common.HexToAddress(fromAddr)
+func (tm *TransactionManager) SendCallMsgTx(toAddr string, data []byte, blockNumber *big.Int) ([]byte, error) {
 	to := common.HexToAddress(toAddr)
 
-	v := new(big.Int)
-	v.SetUint64(uint64(0))
-
-	price := new(big.Int)
-	if gasPrice == 0 {
-		gasPrice = tm.gasPrice
-	}
-	price.SetUint64(gasPrice)
-
 	msg := ethereum.CallMsg{
-		From:     from,
-		To:       &to,
-		Gas:      gasLimit,
-		GasPrice: price,
-		Value:    v,
-		Data:     data,
+		To:   &to,
+		Data: data,
 	}
-	return tm.Client.CallContract(context.Background(), msg, nil)
+	return tm.Client.CallContract(context.Background(), msg, blockNumber)
 }
 
 // CreateContract creates a contract,return tx's hash,use it to query contract address
@@ -277,12 +263,13 @@ func (tm *TransactionManager) WriteContractSync(sk string, contractAddress strin
 	}
 }
 
-func (tm *TransactionManager) ReadContract(fromAddr string, contractAddress string, abi string, methodName, args string, gasPrice uint64, gasLimit uint64) ([]byte, error) {
+// ReadContract send a call msg tx to contract, set blockNumber to nil for latest block
+func (tm *TransactionManager) ReadContract(contractAddress string, abi string, methodName, args string, blockNumber *big.Int) ([]byte, error) {
 	payload, err := Pack(abi, methodName, args)
 	if err != nil {
 		return nil, err
 	}
-	output, err := tm.SendCallMsgTx(fromAddr, contractAddress, payload, gasPrice, gasLimit)
+	output, err := tm.SendCallMsgTx(contractAddress, payload, blockNumber)
 	if err != nil {
 		return nil, err
 	}
