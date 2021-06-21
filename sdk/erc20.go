@@ -19,6 +19,7 @@ const (
 	MethodTransfer     = "transfer"
 	MethodApprove      = "approve"
 	MethodTransferFrom = "transferFrom"
+	MethodAllowance    = "allowance"
 )
 
 // Symbol ERC20 symbol
@@ -43,10 +44,22 @@ func (tm *TransactionManager) Transfer(contractAddress string, sk string, to str
 	return tm.WriteContract(sk, contractAddress, nil, ERC20_ABI, MethodTransfer, args, price, nonce, limit)
 }
 
+// Transfer ERC20 transfer sync
+func (tm *TransactionManager) TransferSync(contractAddress string, sk string, to string, value string, price uint64, nonce uint64, limit uint64) (string, uint64, error) {
+	args := fmt.Sprintf("address:%v;uint256:%v", to, value)
+	return tm.WriteContractSync(sk, contractAddress, nil, ERC20_ABI, MethodTransfer, args, price, nonce, limit)
+}
+
 // Approve ERC20 approve
 func (tm *TransactionManager) Approve(contractAddress string, sk string, spender string, value string, price uint64, nonce uint64, limit uint64) (string, error) {
 	args := fmt.Sprintf("address:%v;uint256:%v", spender, value)
 	return tm.WriteContract(sk, contractAddress, nil, ERC20_ABI, MethodApprove, args, price, nonce, limit)
+}
+
+// Approve ERC20 approve sync
+func (tm *TransactionManager) ApproveSync(contractAddress string, sk string, spender string, value string, price uint64, nonce uint64, limit uint64) (string, uint64, error) {
+	args := fmt.Sprintf("address:%v;uint256:%v", spender, value)
+	return tm.WriteContractSync(sk, contractAddress, nil, ERC20_ABI, MethodApprove, args, price, nonce, limit)
 }
 
 // TransferFrom ERC20 transferFrom
@@ -54,3 +67,16 @@ func (tm *TransactionManager) TransferFrom(contractAddress string, sk string, fr
 	args := fmt.Sprintf("address:%v;address:%v;uint256:%v", from, to, value)
 	return tm.WriteContract(sk, contractAddress, nil, ERC20_ABI, MethodTransferFrom, args, price, nonce, limit)
 }
+
+// TransferFrom ERC20 transferFrom sync
+func (tm *TransactionManager) TransferFromSync(contractAddress string, sk string, from string, to string, value string, price uint64, nonce uint64, limit uint64) (string, uint64, error) {
+	args := fmt.Sprintf("address:%v;address:%v;uint256:%v", from, to, value)
+	return tm.WriteContractSync(sk, contractAddress, nil, ERC20_ABI, MethodTransferFrom, args, price, nonce, limit)
+}
+
+// Allowance ERC20 allowance
+func (tm *TransactionManager) Allowance(contractAddress string, owner string, spender string) ([]byte, error) {
+	args := fmt.Sprintf("address:%v;address:%v", owner, spender)
+	return tm.ReadContract(contractAddress, ERC20_ABI, MethodAllowance, args, nil)
+}
+

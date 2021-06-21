@@ -19,7 +19,7 @@ func TestBalanceOf(t *testing.T) {
 		price uint64 = 0
 		limit uint64 = 0
 
-		// rpc             string = "https://bsc-dataseed1.defibit.io/"
+		// rpc string = "https://bsc-dataseed1.defibit.io/"
 		// contractAddress string = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c" // WBNB
 		// addr0        string = "0x14bc30855e76Ba7e83d73BAb362C5cdc79EF2AF3"
 
@@ -53,16 +53,27 @@ func TestBalanceOf(t *testing.T) {
 	t.Logf("symbol: %v", string(ret))
 
 	tm.SetChainID("20")
-	hash, err := tm.Approve(contractAddress, sk0, spender, "100", 10000000, 0, 1000000)
+	hash, _, err := tm.ApproveSync(contractAddress, sk0, spender, "100", 10000000, 0, 1000000)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Logf("approve hash: %v", hash)
 
-	hash, err = tm.TransferFrom(contractAddress, spenderSk, addr0, to, "100", 10000000, 0, 1000000)
+	allowance, err := tm.Allowance(contractAddress, addr0, spender)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("allowlance: %x", allowance)
+
+	hash, _, err = tm.TransferFromSync(contractAddress, spenderSk, addr0, to, "100", 10000000, 0, 1000000)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Logf("transfer from hash: %v", hash)
 
+	allowance, err = tm.Allowance(contractAddress, addr0, spender)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("allowlance: %x", allowance)
 }
