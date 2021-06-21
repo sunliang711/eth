@@ -10,7 +10,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
-	"strconv"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -89,11 +88,12 @@ func DecodeBytes32StringArray(val string) ([][32]byte, error) {
 }
 
 func DecodeUint256String(val string) (*big.Int, error) {
-	v, err := strconv.Atoi(val)
-	if err != nil {
-		return nil, fmt.Errorf("uint256 value format error")
+	v := big.NewInt(0)
+	v, success := v.SetString(val, 10)
+	if !success {
+		return nil, fmt.Errorf("invalid uint256 value")
 	}
-	return big.NewInt(int64(v)), nil
+	return v, nil
 }
 
 func DecodeUint256StringArray(val string) ([]*big.Int, error) {
