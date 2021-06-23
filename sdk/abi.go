@@ -2,7 +2,6 @@ package sdk
 
 import (
 	"fmt"
-	"math/big"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -117,44 +116,11 @@ func Pack(abiStr string, methodName string, args string) ([]byte, error) {
 }
 
 // Unpack decodes output
-func Unpack(abiStr string, methodName string, returnData string) error {
+func Unpack(abiStr string, methodName string, returnData []byte) ([]interface{}, error) {
 	abiObj, err := abi.JSON(strings.NewReader(abiStr))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	var result []interface{}
-	var resultType []string
-	method := abiObj.Methods[methodName]
-	for _, o := range method.Outputs {
-		resultType = append(resultType, o.Type.String())
-		switch o.Type.String() {
-		case "bytes":
-			result = append(result, &[]byte{})
-		case "bytes32":
-			result = append(result, &[32]byte{})
-		case "uint256":
-			result = append(result, big.NewInt(0))
-		case "address":
-			result = append(result, &common.Address{})
-		case "string":
-			var s string
-			result = append(result, &s)
-		default:
-			return fmt.Errorf("Not support type: %s\n", o.Type.String())
-		}
-	}
-
-	data, err := DecodeHexString(returnData)
-	if err != nil {
-		return err
-	}
-
-	abiObj.Unpack(&result, methodName, data)
-	for i, r := range result {
-		fmt.Printf("type: %s, value: %+v\n", resultType[i], r)
-	}
-	// TODO return value
-
-	return nil
+	return abiObj.Unpack(methodName, returnData)
 }
