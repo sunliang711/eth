@@ -7,7 +7,9 @@
 package sdk
 
 import (
+	"errors"
 	"fmt"
+	"math/big"
 )
 
 const (
@@ -23,19 +25,65 @@ const (
 )
 
 // Symbol ERC20 symbol
-func (tm *TransactionManager) Symbol(contractAddress string) ([]byte, error) {
-	return tm.ReadContract(contractAddress, ERC20_ABI, MethodSymbol, "", nil)
+func (tm *TransactionManager) Symbol(contractAddress string) (string, error) {
+	raw, err := tm.ReadContract(contractAddress, ERC20_ABI, MethodSymbol, "", nil)
+	if err != nil {
+		return "", err
+	}
+	data, err := Unpack(ERC20_ABI, MethodSymbol, raw)
+	if err != nil {
+		return "", err
+	}
+	if len(data) == 1 {
+		if ret, ok := data[0].(string); ok {
+			return ret, nil
+		} else {
+			return "", errors.New("returned data not string")
+		}
+	}
+	return "", errors.New("symbol() returned data error")
 }
 
 // TotalSupply ERC20 totalSupply
-func (tm *TransactionManager) TotalSupply(contractAddress string) ([]byte, error) {
-	return tm.ReadContract(contractAddress, ERC20_ABI, MethodTotalSupply, "", nil)
+func (tm *TransactionManager) TotalSupply(contractAddress string) (*big.Int, error) {
+	raw, err := tm.ReadContract(contractAddress, ERC20_ABI, MethodTotalSupply, "", nil)
+	if err != nil {
+		return nil, err
+	}
+	data, err := Unpack(ERC20_ABI, MethodTotalSupply, raw)
+	if err != nil {
+		return nil, err
+	}
+	if len(data) == 1 {
+		if ret, ok := data[0].(*big.Int); ok {
+			return ret, nil
+		} else {
+			return nil, errors.New("returned data not big.Int")
+		}
+	}
+	return nil, errors.New("totalSupply() returned data error")
 }
 
 // BalanceOf ERC20 balanceOf
-func (tm *TransactionManager) BalanceOf(contractAddress string, owner string) ([]byte, error) {
+func (tm *TransactionManager) BalanceOf(contractAddress string, owner string) (*big.Int, error) {
 	args := fmt.Sprintf("address:%v", owner)
-	return tm.ReadContract(contractAddress, ERC20_ABI, MethodBalanceOf, args, nil)
+	raw, err := tm.ReadContract(contractAddress, ERC20_ABI, MethodBalanceOf, args, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := Unpack(ERC20_ABI, MethodBalanceOf, raw)
+	if err != nil {
+		return nil, err
+	}
+	if len(data) == 1 {
+		if ret, ok := data[0].(*big.Int); ok {
+			return ret, nil
+		} else {
+			return nil, errors.New("returned data not big.Int")
+		}
+	}
+	return nil, errors.New("balanceOf() returned data error")
 }
 
 // Transfer ERC20 transfer
@@ -75,8 +123,24 @@ func (tm *TransactionManager) TransferFromSync(contractAddress string, sk string
 }
 
 // Allowance ERC20 allowance
-func (tm *TransactionManager) Allowance(contractAddress string, owner string, spender string) ([]byte, error) {
+func (tm *TransactionManager) Allowance(contractAddress string, owner string, spender string) (*big.Int, error) {
 	args := fmt.Sprintf("address:%v;address:%v", owner, spender)
-	return tm.ReadContract(contractAddress, ERC20_ABI, MethodAllowance, args, nil)
-}
+	raw, err := tm.ReadContract(contractAddress, ERC20_ABI, MethodAllowance, args, nil)
+	if err != nil {
+		return nil, err
+	}
 
+	data, err := Unpack(ERC20_ABI, MethodAllowance, raw)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) == 1 {
+		if ret, ok := data[0].(*big.Int); ok {
+			return ret, nil
+		} else {
+			return nil, errors.New("returned data not big.Int")
+		}
+	}
+	return nil, errors.New("allowance() returned data error")
+}
