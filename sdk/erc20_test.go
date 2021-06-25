@@ -42,19 +42,23 @@ func TestBalanceOf(t *testing.T) {
 	}
 	t.Logf("balanceOf: %v", ret)
 
-
 	symb, err := tm.Symbol(contractAddress)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Logf("symbol: '%v'", symb)
 
+	decimals, err := tm.Decimals(contractAddress)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("decimals: %v", decimals)
+
 	total, err := tm.TotalSupply(contractAddress)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Logf("totalSupply: %v", total)
-
 
 	tm.SetChainID("20")
 	hash, _, err := tm.ApproveSync(contractAddress, sk0, spender, "100", 10000000, 0, 1000000)
