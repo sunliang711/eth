@@ -63,8 +63,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "new transaction manager error: %v", err)
 		os.Exit(1)
 	}
-	// for EIP255,you need set chain id
-	txManager.SetChainID("20")
 
 	var (
 		sk       string
@@ -106,8 +104,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "new transaction manager error: %v", err)
 		os.Exit(1)
 	}
-	// for EIP255,you need set chain id
-	txManager.SetChainID("20")
 
 	var (
 		sk              string
@@ -163,8 +159,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "new transaction manager error: %v", err)
 		os.Exit(1)
 	}
-	// for EIP255,you need set chain id
-	txManager.SetChainID("20")
 
 	var (
 		contractAddress string

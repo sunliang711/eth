@@ -27,6 +27,7 @@ type TransactionManager struct {
 	interval uint64
 	*ethclient.Client
 	chainID string
+	eip155  bool
 }
 
 // New makes a new TransactionManager
@@ -43,6 +44,7 @@ func New(rpcURL string, gasPrice, gasLimit, timeout, interval uint64) (*Transact
 		gasLimit: gasLimit,
 		timeout:  timeout,
 		interval: interval,
+		eip155:   true,
 	}
 	tm.Client, err = dial(tm.rpcURL)
 	if err != nil {
@@ -56,6 +58,13 @@ func New(rpcURL string, gasPrice, gasLimit, timeout, interval uint64) (*Transact
 		tm.gasPrice = sgp.Uint64()
 	}
 
+	chainID, err := tm.Client.ChainID(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	tm.chainID = chainID.String()
+
 	if timeout == 0 {
 		tm.timeout = defaultTimeout
 	}
@@ -66,10 +75,10 @@ func New(rpcURL string, gasPrice, gasLimit, timeout, interval uint64) (*Transact
 	return tm, nil
 }
 
-// set chain id for EIP155
-func (tm *TransactionManager) SetChainID(id string) {
-	tm.chainID = id
-}
+// // set chain id for EIP155
+// func (tm *TransactionManager) SetChainID(id string) {
+// 	tm.chainID = id
+// }
 
 func (tm *TransactionManager) Close() {
 	tm.Client.Close()
@@ -77,6 +86,10 @@ func (tm *TransactionManager) Close() {
 
 func (tm *TransactionManager) GasPrice() uint64 {
 	return tm.gasPrice
+}
+
+func (tm *TransactionManager) DisableEIP155() {
+	tm.eip155 = false
 }
 
 // SendTx sends an async tx, and return tx's hash
@@ -116,7 +129,7 @@ func (tm *TransactionManager) SendTx(fromSK string, toAddr string, value *big.In
 		tx = types.NewContractCreation(nonce, value, gasLimit, price, data)
 	}
 	var signedTx *types.Transaction
-	if tm.chainID != "" {
+	if tm.eip155 {
 		chainId, success := big.NewInt(0).SetString(tm.chainID, 10)
 		if !success {
 			return "", fmt.Errorf("invalid chain id")
