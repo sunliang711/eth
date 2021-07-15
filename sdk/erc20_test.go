@@ -60,7 +60,6 @@ func TestBalanceOf(t *testing.T) {
 	}
 	t.Logf("totalSupply: %v", total)
 
-	tm.SetChainID("20")
 	hash, _, err := tm.ApproveSync(contractAddress, sk0, spender, "100", 10000000, 0, 1000000)
 	if err != nil {
 		t.Fatal(err)
