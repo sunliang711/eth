@@ -121,6 +121,8 @@ func (tm *TransactionManager) SendTx(fromSK string, toAddr string, value *big.In
 		gasLimit = tm.gasLimit
 	}
 
+	// TODO go-ethereum: blockchain_test.go
+	// use NewTx()
 	var tx *types.Transaction
 	if toAddr != "" {
 		tx = types.NewTransaction(nonce, toAddress, value, gasLimit, price, data)
@@ -201,14 +203,14 @@ func (tm *TransactionManager) TransferEthSync(fromSK string, toAddr string, valu
 
 // TransferEthWithData send an async eth-transfer tx
 // return tx hash,error
-func (tm *TransactionManager) TransferEthWithData(fromSK string, toAddr string, value *big.Int,data []byte, gasPrice uint64, nonce uint64) (string, error) {
+func (tm *TransactionManager) TransferEthWithData(fromSK string, toAddr string, value *big.Int, data []byte, gasPrice uint64, nonce uint64) (string, error) {
 	return tm.SendTx(fromSK, toAddr, value, data, gasPrice, nonce, transferEthLimit)
 }
 
 // TransferEthWithDataSync send an sync eth-transfer tx
 // return tx hash,error
 func (tm *TransactionManager) TransferEthWithDataSync(fromSK string, toAddr string, value *big.Int, data []byte, gasPrice uint64, nonce uint64) (string, error) {
-	hash, err := tm.TransferEthWithData(fromSK, toAddr, value,data, gasPrice, nonce)
+	hash, err := tm.TransferEthWithData(fromSK, toAddr, value, data, gasPrice, nonce)
 	if err != nil {
 		return "", err
 	}
@@ -233,4 +235,8 @@ func (tm *TransactionManager) TransferEthWithDataSync(fromSK string, toAddr stri
 // GetBalance query balance of 'address'
 func (tm *TransactionManager) GetBalance(address string) (*big.Int, error) {
 	return tm.Client.BalanceAt(context.Background(), common.HexToAddress(address), nil)
+}
+
+func (tm *TransactionManager) Receipt(hash string) (*types.Receipt, error) {
+	return tm.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
 }
