@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	ERC20_ABI = `[{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function","stateMutability":"view"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_amount","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"payable":false,"type":"function","stateMutability":"nonpayable"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"totalSupply","type":"uint256"}],"payable":false,"type":"function","stateMutability":"view"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"payable":false,"type":"function","stateMutability":"nonpayable"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"type":"function","stateMutability":"view"},{"constant":false,"inputs":[],"name":"destroy","outputs":[{"name":"success","type":"bool"}],"payable":false,"type":"function","stateMutability":"nonpayable"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function","stateMutability":"view"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function","stateMutability":"view"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"type":"function","stateMutability":"nonpayable"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"type":"function","stateMutability":"view"},{"inputs":[],"payable":false,"type":"constructor","stateMutability":"nonpayable"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":true,"name":"_to","type":"address"},{"indexed":false,"name":"_value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_owner","type":"address"},{"indexed":true,"name":"_spender","type":"address"},{"indexed":false,"name":"_value","type":"uint256"}],"name":"Approval","type":"event"}]`
+	ERC20_ABI = `[{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function","stateMutability":"view"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_amount","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"payable":false,"type":"function","stateMutability":"nonpayable"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"totalSupply","type":"uint256"}],"payable":false,"type":"function","stateMutability":"view"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"payable":false,"type":"function","stateMutability":"nonpayable"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"type":"function","stateMutability":"view"},{"constant":false,"inputs":[],"name":"destroy","outputs":[{"name":"success","type":"bool"}],"payable":false,"type":"function","stateMutability":"nonpayable"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function","stateMutability":"view"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function","stateMutability":"view"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"type":"function","stateMutability":"nonpayable"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"type":"function","stateMutability":"view"},{"inputs":[],"payable":false,"type":"constructor","stateMutability":"nonpayable"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":true,"name":"_to","type":"address"},{"indexed":false,"name":"_value","type":"uint256"}],"name":"Transfer20","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_owner","type":"address"},{"indexed":true,"name":"_spender","type":"address"},{"indexed":false,"name":"_value","type":"uint256"}],"name":"Approval","type":"event"}]`
 
 	MethodSymbol       = "symbol"
 	MethodDecimals     = "decimals"
@@ -25,8 +25,8 @@ const (
 	MethodAllowance    = "allowance"
 )
 
-// Symbol ERC20 symbol
-func (tm *TransactionManager) Symbol(contractAddress string) (string, error) {
+// Symbol20 ERC20 symbol
+func (tm *TransactionManager) Symbol20(contractAddress string) (string, error) {
 	raw, err := tm.ReadContract(contractAddress, ERC20_ABI, MethodSymbol, "", nil)
 	if err != nil {
 		return "", err
@@ -45,8 +45,8 @@ func (tm *TransactionManager) Symbol(contractAddress string) (string, error) {
 	return "", errors.New("symbol() returned data error")
 }
 
-// TotalSupply ERC20 totalSupply
-func (tm *TransactionManager) TotalSupply(contractAddress string) (*big.Int, error) {
+// TotalSupply20 ERC20 totalSupply
+func (tm *TransactionManager) TotalSupply20(contractAddress string) (*big.Int, error) {
 	raw, err := tm.ReadContract(contractAddress, ERC20_ABI, MethodTotalSupply, "", nil)
 	if err != nil {
 		return nil, err
@@ -65,8 +65,8 @@ func (tm *TransactionManager) TotalSupply(contractAddress string) (*big.Int, err
 	return nil, errors.New("totalSupply() returned data error")
 }
 
-// BalanceOf ERC20 balanceOf
-func (tm *TransactionManager) BalanceOf(contractAddress string, owner string) (*big.Int, error) {
+// BalanceOf20 ERC20 balanceOf
+func (tm *TransactionManager) BalanceOf20(contractAddress string, owner string) (*big.Int, error) {
 	args := fmt.Sprintf("address:%v", owner)
 	raw, err := tm.ReadContract(contractAddress, ERC20_ABI, MethodBalanceOf, args, nil)
 	if err != nil {
@@ -87,44 +87,44 @@ func (tm *TransactionManager) BalanceOf(contractAddress string, owner string) (*
 	return nil, errors.New("balanceOf() returned data error")
 }
 
-// Transfer ERC20 transfer
-func (tm *TransactionManager) Transfer(contractAddress string, sk string, to string, value string, price uint64, nonce uint64, limit uint64) (string, error) {
+// Transfer20 ERC20 transfer
+func (tm *TransactionManager) Transfer20(contractAddress string, sk string, to string, value string, price uint64, nonce uint64, limit uint64) (string, error) {
 	args := fmt.Sprintf("address:%v;uint256:%v", to, value)
 	return tm.WriteContract(sk, contractAddress, nil, ERC20_ABI, MethodTransfer, args, price, nonce, limit)
 }
 
-// Transfer ERC20 transfer sync
-func (tm *TransactionManager) TransferSync(contractAddress string, sk string, to string, value string, price uint64, nonce uint64, limit uint64) (string, uint64, error) {
+// Transfer20 ERC20 transfer sync
+func (tm *TransactionManager) TransferSync20(contractAddress string, sk string, to string, value string, price uint64, nonce uint64, limit uint64) (string, uint64, error) {
 	args := fmt.Sprintf("address:%v;uint256:%v", to, value)
 	return tm.WriteContractSync(sk, contractAddress, nil, ERC20_ABI, MethodTransfer, args, price, nonce, limit)
 }
 
-// Approve ERC20 approve
-func (tm *TransactionManager) Approve(contractAddress string, sk string, spender string, value string, price uint64, nonce uint64, limit uint64) (string, error) {
+// Approve20 ERC20 approve
+func (tm *TransactionManager) Approve20(contractAddress string, sk string, spender string, value string, price uint64, nonce uint64, limit uint64) (string, error) {
 	args := fmt.Sprintf("address:%v;uint256:%v", spender, value)
 	return tm.WriteContract(sk, contractAddress, nil, ERC20_ABI, MethodApprove, args, price, nonce, limit)
 }
 
-// Approve ERC20 approve sync
-func (tm *TransactionManager) ApproveSync(contractAddress string, sk string, spender string, value string, price uint64, nonce uint64, limit uint64) (string, uint64, error) {
+// Approve20 ERC20 approve sync
+func (tm *TransactionManager) ApproveSync20(contractAddress string, sk string, spender string, value string, price uint64, nonce uint64, limit uint64) (string, uint64, error) {
 	args := fmt.Sprintf("address:%v;uint256:%v", spender, value)
 	return tm.WriteContractSync(sk, contractAddress, nil, ERC20_ABI, MethodApprove, args, price, nonce, limit)
 }
 
-// TransferFrom ERC20 transferFrom
-func (tm *TransactionManager) TransferFrom(contractAddress string, sk string, from string, to string, value string, price uint64, nonce uint64, limit uint64) (string, error) {
+// TransferFrom20 ERC20 transferFrom
+func (tm *TransactionManager) TransferFrom20(contractAddress string, sk string, from string, to string, value string, price uint64, nonce uint64, limit uint64) (string, error) {
 	args := fmt.Sprintf("address:%v;address:%v;uint256:%v", from, to, value)
 	return tm.WriteContract(sk, contractAddress, nil, ERC20_ABI, MethodTransferFrom, args, price, nonce, limit)
 }
 
-// TransferFrom ERC20 transferFrom sync
-func (tm *TransactionManager) TransferFromSync(contractAddress string, sk string, from string, to string, value string, price uint64, nonce uint64, limit uint64) (string, uint64, error) {
+// TransferFrom20 ERC20 transferFrom sync
+func (tm *TransactionManager) TransferFromSync20(contractAddress string, sk string, from string, to string, value string, price uint64, nonce uint64, limit uint64) (string, uint64, error) {
 	args := fmt.Sprintf("address:%v;address:%v;uint256:%v", from, to, value)
 	return tm.WriteContractSync(sk, contractAddress, nil, ERC20_ABI, MethodTransferFrom, args, price, nonce, limit)
 }
 
-// Allowance ERC20 allowance
-func (tm *TransactionManager) Allowance(contractAddress string, owner string, spender string) (*big.Int, error) {
+// Allowance20 ERC20 allowance
+func (tm *TransactionManager) Allowance20(contractAddress string, owner string, spender string) (*big.Int, error) {
 	args := fmt.Sprintf("address:%v;address:%v", owner, spender)
 	raw, err := tm.ReadContract(contractAddress, ERC20_ABI, MethodAllowance, args, nil)
 	if err != nil {
@@ -146,8 +146,8 @@ func (tm *TransactionManager) Allowance(contractAddress string, owner string, sp
 	return nil, errors.New("allowance() returned data error")
 }
 
-// Decimals ERC20 decimals
-func (tm *TransactionManager) Decimals(contractAddress string) (uint8, error) {
+// Decimals20 ERC20 decimals
+func (tm *TransactionManager) Decimals20(contractAddress string) (uint8, error) {
 	raw, err := tm.ReadContract(contractAddress, ERC20_ABI, MethodDecimals, "", nil)
 	if err != nil {
 		return 0, err
